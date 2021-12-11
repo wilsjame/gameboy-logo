@@ -7,7 +7,7 @@ from typing import *
 Byte   = str
 Nibble = str
 Game   = List[Byte]
-Logo   = List[List[Union[Nibble]]]
+Logo   = List[List[Nibble]]
 
 def read_input(rom_file: str=red) -> Game:
     """Read Gameboy ROM and return game data as a list of bytes"""
