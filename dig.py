@@ -1,7 +1,5 @@
-# test input
-red = "Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb"
-
 # Imports, Types, Utility Functions
+import argparse
 from typing import *
 
 Byte   = str
@@ -9,7 +7,7 @@ Nibble = str
 Game   = List[Byte]
 Logo   = List[List[Nibble]]
 
-def read_input(rom_file: str=red) -> Game:
+def read_input(rom_file: str) -> Game:
     """Read Gameboy ROM and return game data as a list of bytes"""
     game = list()
     with open(rom_file, "rb") as f:
@@ -19,6 +17,28 @@ def read_input(rom_file: str=red) -> Game:
             byte = f.read(1)
             game.append(byte)
     return game
+
+def extract_logo(game: Game) -> Logo:
+    """Extract logo from game data and return as a 2D nibble map"""
+    nibble = list()
+    hexmap = [[0] * 12 for row in range(8)] # of nibbles
+
+    # extract logo from game data
+    for addr in range(int('0x0104', 16), int('0x0133', 16) + 1):
+        nibble.append(game[addr].hex()[0])
+        nibble.append(game[addr].hex()[1])
+
+    # arrange logo data in correct order
+    for i in range(2*48):
+        if (i + 1) % 4 == 0:
+            if i < 48:             
+                for j in range(4): # top half
+                    hexmap[j][((i + 1) // 4) - 1] = nibble[i - (3 - j)]
+            else:                  
+                for j in range(4): # bottom half
+                    hexmap[j + 4][(((i - 48) + 1) // 4) - 1] = nibble[i - (3 - j)]
+
+    return hexmap
 
 def visualize(logo: Logo, in_bits: bool=False) -> None:
     """Visualize extracted Nintendo logo stored in a 2D list"""
@@ -30,6 +50,18 @@ def visualize(logo: Logo, in_bits: bool=False) -> None:
                 print(logo[i][j], end=' ')
         print()
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.parse_args()
+
+def main():
+    rom_path = "Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb"
+    game = read_input(rom_path)
+    logo = extract_logo(game)
+    visualize(logo, in_bits=True)
+
+main()
+
 # scratch work
 # nintendo logo
 # each byte is a 2x4 pixel bitmap
@@ -37,24 +69,3 @@ def visualize(logo: Logo, in_bits: bool=False) -> None:
 # entire logo is 8x12 nibbles or 8x48 bits 
 # bytes are scanned vertically
 # upper and lower halfs
-game   = read_input()
-nibble = list()
-hexmap = [[0] * 12 for row in range(8)] # of nibbles
-
-# extract logo from game data
-for addr in range(int('0x0104', 16), int('0x0133', 16) + 1):
-    nibble.append(game[addr].hex()[0])
-    nibble.append(game[addr].hex()[1])
-
-# arrange logo data in correct order
-for i in range(2*48):
-    if (i + 1) % 4 == 0:
-        if i < 48:             
-            for j in range(4): # top half
-                hexmap[j][((i + 1) // 4) - 1] = nibble[i - (3 - j)]
-        else:                  
-            for j in range(4): # bottom half
-                hexmap[j + 4][(((i - 48) + 1) // 4) - 1] = nibble[i - (3 - j)]
-
-visualize(hexmap)
-visualize(hexmap, in_bits=True)
