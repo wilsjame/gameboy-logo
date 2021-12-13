@@ -1,7 +1,7 @@
-# Imports, Types, Utility Functions
 import argparse
-from typing import *
+from   typing   import *
 
+# Types
 Byte   = str
 Nibble = str
 Game   = List[Byte]
@@ -18,6 +18,7 @@ def read_input(rom_file: str) -> Game:
             game.append(byte)
     return game
 
+# this is the actual algorithm all else is extra! 
 def extract_logo(game: Game) -> Logo:
     """Extract logo from game data and return as a 2D nibble map"""
     nibble = list()
@@ -40,25 +41,46 @@ def extract_logo(game: Game) -> Logo:
 
     return hexmap
 
-def visualize(logo: Logo, in_bits: bool=False) -> None:
+def visualize(logo: Logo, in_hex: bool=False, in_bits: bool=False, custom: str='* ') -> None:
     """Visualize extracted Nintendo logo stored in a 2D list"""
     for i in range(8):
         for j in range(12):
-            if in_bits:
+            if in_hex:
+                print(logo[i][j], end=' ')
+            elif in_bits:
                 print(bin(int(logo[i][j], 16))[2:].zfill(4), end='')
             else:
-                print(logo[i][j], end=' ')
+                foreground = custom[0]
+                background = ' ' if len(custom) == 1 else custom[1]
+                for bit in str(bin(int(logo[i][j], 16))[2:].zfill(4)):
+                    if bit == '1':
+                        print(foreground, end='')
+                    else:
+                        print(background, end='')
         print()
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.parse_args()
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(description="extract nintendo logo from .gb rom")
+    parser.add_argument("-x", "--hex", action="store_true", help="show hex nibble map of logo")
+    parser.add_argument("-b", "--bits", action="store_true", help="show bitmap")
+    parser.add_argument("-c", "--custom", type=str, default='@ ', help="customize the logo foreground and background characters ex) [-c $*] prints a $ foreground and * background ex) [-c $] prints a $ foreground and an empty background hint) you may want to escape some symbols or use quotes e.g. \# or '#'")
+    args = parser.parse_args()
+    return args
 
 def main():
+    args = parse_args()
     rom_path = "Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb"
     game = read_input(rom_path)
     logo = extract_logo(game)
-    visualize(logo, in_bits=True)
+
+    if args.hex:
+        visualize(logo, in_hex=True)
+    if args.bits:
+        visualize(logo, in_bits=True)
+
+    # always show logo
+    visualize(logo, custom=args.custom)
 
 main()
 
