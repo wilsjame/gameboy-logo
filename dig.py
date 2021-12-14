@@ -16,6 +16,7 @@ def read_input(rom_file: str) -> Game:
         while byte:
             byte = f.read(1)
             game.append(byte)
+
     return game
 
 # this is the actual algorithm all else is extra! 
@@ -61,17 +62,19 @@ def visualize(logo: Logo, in_hex: bool=False, in_bits: bool=False, custom: str='
 
 def parse_args():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(description="extract nintendo logo from .gb rom")
+    parser = argparse.ArgumentParser(description="extract nintendo logo from gameboy rom")
+    parser.add_argument("rom_file", help="path to .gb rom file")
     parser.add_argument("-x", "--hex", action="store_true", help="show hex nibble map of logo")
     parser.add_argument("-b", "--bits", action="store_true", help="show bitmap")
     parser.add_argument("-c", "--custom", type=str, default='@ ', help="customize the logo foreground and background characters ex) [-c $*] prints a $ foreground and * background ex) [-c $] prints a $ foreground and an empty background hint) you may want to escape some symbols or use quotes e.g. \# or '#'")
     args = parser.parse_args()
+
     return args
 
 def main():
     args = parse_args()
-    rom_path = "Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb"
-    game = read_input(rom_path)
+    rom_file = args.rom_file
+    game = read_input(rom_file)
     logo = extract_logo(game)
 
     if args.hex:
@@ -84,10 +87,11 @@ def main():
 
 main()
 
-# scratch work
+# notes
 # nintendo logo
 # each byte is a 2x4 pixel bitmap
 # each two byte pair represents 4x4 pixels
 # entire logo is 8x12 nibbles or 8x48 bits 
 # bytes are scanned vertically
 # upper and lower halfs
+#rom_file = "Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb"
