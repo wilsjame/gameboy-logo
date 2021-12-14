@@ -86,12 +86,3 @@ def main():
     visualize(logo, custom=args.custom)
 
 main()
-
-# notes
-# nintendo logo
-# each byte is a 2x4 pixel bitmap
-# each two byte pair represents 4x4 pixels
-# entire logo is 8x12 nibbles or 8x48 bits 
-# bytes are scanned vertically
-# upper and lower halfs
-#rom_file = "Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb"
